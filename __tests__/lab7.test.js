@@ -65,15 +65,17 @@ describe('Basic user flow for Website', () => {
   it('Checking number of items in cart on screen', async () => {
     console.log('Checking number of items in cart on screen...');
 
-    const prodItems = await page.$$('product-item');
-    for (let i = 0; i < prodItems.length; i++) {
-      const shadowRoot = await prodItems[i].getProperty('shadowRoot');
-      const button = await shadowRoot.$('button');
-      const text = await (await button.getProperty('innerText')).jsonValue();
-      if (text === 'Add to Cart') {
-        await button.click();
-      }
-    }
+    await page.evaluate(() => {
+      document.querySelectorAll('product-item').forEach(item => {
+        const btn = item.shadowRoot.querySelector('button');
+        if (btn && btn.innerText === 'Add to Cart') btn.click();
+      });
+    });
+
+    await page.waitForFunction(
+      () => document.querySelector('#cart-count').innerText === '20',
+      { timeout: 10000 }
+    );
 
     const cartCount = await page.$eval('#cart-count', el => el.innerText);
     expect(cartCount).toBe('20');
@@ -94,14 +96,13 @@ describe('Basic user flow for Website', () => {
       });
     }, { timeout: 10000 });
 
-    const prodItems = await page.$$('product-item');
-    let allRemove = true;
-    for (let i = 0; i < prodItems.length; i++) {
-      const shadowRoot = await prodItems[i].getProperty('shadowRoot');
-      const button = await shadowRoot.$('button');
-      const text = await (await button.getProperty('innerText')).jsonValue();
-      if (text !== 'Remove from Cart') { allRemove = false; }
-    }
+    const allRemove = await page.evaluate(() => {
+      const items = document.querySelectorAll('product-item');
+      return Array.from(items).every(item => {
+        const btn = item.shadowRoot && item.shadowRoot.querySelector('button');
+        return btn && btn.innerText === 'Remove from Cart';
+      });
+    });
     expect(allRemove).toBe(true);
 
     const cartCount = await page.$eval('#cart-count', el => el.innerText);
@@ -119,15 +120,17 @@ describe('Basic user flow for Website', () => {
   it('Checking number of items in cart on screen after removing from cart', async () => {
     console.log('Checking number of items in cart on screen...');
 
-    const prodItems = await page.$$('product-item');
-    for (let i = 0; i < prodItems.length; i++) {
-      const shadowRoot = await prodItems[i].getProperty('shadowRoot');
-      const button = await shadowRoot.$('button');
-      const text = await (await button.getProperty('innerText')).jsonValue();
-      if (text === 'Remove from Cart') {
-        await button.click();
-      }
-    }
+    await page.evaluate(() => {
+      document.querySelectorAll('product-item').forEach(item => {
+        const btn = item.shadowRoot.querySelector('button');
+        if (btn && btn.innerText === 'Remove from Cart') btn.click();
+      });
+    });
+
+    await page.waitForFunction(
+      () => document.querySelector('#cart-count').innerText === '0',
+      { timeout: 10000 }
+    );
 
     const cartCount = await page.$eval('#cart-count', el => el.innerText);
     expect(cartCount).toBe('0');
@@ -149,14 +152,13 @@ describe('Basic user flow for Website', () => {
       });
     }, { timeout: 10000 });
 
-    const prodItems = await page.$$('product-item');
-    let allAdd = true;
-    for (let i = 0; i < prodItems.length; i++) {
-      const shadowRoot = await prodItems[i].getProperty('shadowRoot');
-      const button = await shadowRoot.$('button');
-      const text = await (await button.getProperty('innerText')).jsonValue();
-      if (text !== 'Add to Cart') { allAdd = false; }
-    }
+    const allAdd = await page.evaluate(() => {
+      const items = document.querySelectorAll('product-item');
+      return Array.from(items).every(item => {
+        const btn = item.shadowRoot && item.shadowRoot.querySelector('button');
+        return btn && btn.innerText === 'Add to Cart';
+      });
+    });
     expect(allAdd).toBe(true);
 
     const cartCount = await page.$eval('#cart-count', el => el.innerText);
