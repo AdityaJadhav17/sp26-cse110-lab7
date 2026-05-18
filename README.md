@@ -5,7 +5,7 @@
 - **Partner Name:** N/A
 
 ## Screenshot
-- [npm-test-run screenshot](screenshots\npm-test-screenshot.png) 
+- [npm-test-run screenshot](screenshots/npm-test-screenshot.png) 
 
 ## Check Your Understanding
 
